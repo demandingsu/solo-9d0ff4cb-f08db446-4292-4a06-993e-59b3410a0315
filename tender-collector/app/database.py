@@ -125,6 +125,22 @@ def fetch_all_announcements(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     )
 
 
+def fetch_announcement_group(
+    conn: sqlite3.Connection, original_code: str
+) -> list[sqlite3.Row]:
+    """取一份原公告及其全部更正公告（用于保证金核验时还原生效截止时间）。"""
+    return list(
+        conn.execute(
+            """
+            SELECT * FROM announcements
+            WHERE code = ? OR corrects_code = ?
+            ORDER BY published_at, code
+            """,
+            (original_code, original_code),
+        )
+    )
+
+
 def fetch_runs(conn: sqlite3.Connection, limit: int = 20) -> list[sqlite3.Row]:
     return list(
         conn.execute(
